@@ -857,7 +857,111 @@
     margin-top: 40px;
   }
 
-  /* ===== INFO TAG ===== */
+  /* ===== COST CORRECTION PANEL ===== */
+  .cost-correction-panel {
+    background: linear-gradient(135deg, #FFF7ED 0%, #FFFBEB 100%);
+    border: 1.5px solid var(--orange);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cost-correction-panel::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(249,115,22,0.07);
+  }
+
+  .cost-correction-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 1100px) { .cost-correction-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px)  { .cost-correction-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .cost-input-wrap { position: relative; }
+
+  .cost-input-wrap input {
+    width: 100%;
+    padding: 9px 28px 9px 12px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--gray-900);
+    background: var(--white);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  .cost-input-wrap input:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+  }
+
+  .cost-input-wrap input.has-cost-override {
+    border-color: var(--orange);
+    background: #FFF7ED;
+    font-weight: 600;
+    color: #C2410C;
+  }
+
+  .cost-input-wrap .cost-reset-btn {
+    position: absolute;
+    right: 8px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--gray-400); font-size: 13px; padding: 2px; line-height: 1;
+    transition: color 0.2s; display: none;
+  }
+
+  .cost-input-wrap input.has-cost-override ~ .cost-reset-btn { display: block; color: var(--orange); }
+  .cost-input-wrap .cost-reset-btn:hover { color: var(--red); }
+
+  .mode-badge.cost-adjusted { background: var(--orange-light); color: var(--orange); }
+  .mode-badge.cost-adjusted::before { content: '●'; font-size: 8px; animation: pulse 1.5s infinite; margin-right: 3px; }
+
+  .cost-category-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .cost-cat-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 4px;
+  }
+
+  .cost-cat-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid var(--gray-300);
+    background: var(--white);
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+
+  .cost-cat-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .cost-cat-btn.active { background: var(--orange); border-color: var(--orange); color: white; }
   .tag {
     display: inline-flex;
     align-items: center;
@@ -1087,6 +1191,59 @@
     <div class="section-title">Proyección Financiera</div>
     <div class="section-desc">Datos anuales completos 2026–2035 · Todos los valores en €</div>
 
+    <!-- PANEL DE CORRECCIÓN DE GASTOS -->
+    <div class="cost-correction-panel">
+      <div class="correction-panel-title">
+        💸 Corrección Manual de Costes Reales
+        <span class="mode-badge original" id="costModeBadge">Modelo Original</span>
+      </div>
+      <div class="correction-panel-desc">
+        Introduce los costes reales o revisados por año y categoría. El modelo recalculará automáticamente el EBITDA y los márgenes. Los campos vacíos mantienen la proyección original.
+      </div>
+
+      <!-- Category selector -->
+      <div class="cost-category-selector">
+        <span class="cost-cat-label">Ver:</span>
+        <button class="cost-cat-btn active" onclick="setCostCategory('total', this)">📊 Coste Total</button>
+        <button class="cost-cat-btn" onclick="setCostCategory('personal', this)">👤 Personal</button>
+        <button class="cost-cat-btn" onclick="setCostCategory('tech', this)">💻 Tecnología</button>
+        <button class="cost-cat-btn" onclick="setCostCategory('marketing', this)">📣 Marketing</button>
+        <button class="cost-cat-btn" onclick="setCostCategory('ops', this)">⚙️ Operaciones</button>
+      </div>
+
+      <div class="cost-correction-grid" id="costCorrectionGrid"></div>
+
+      <div class="correction-actions">
+        <button class="btn-calc" style="background:linear-gradient(135deg,var(--orange) 0%,#EA580C 100%);" onclick="applyCostCorrections()">⚡ Aplicar y Recalcular</button>
+        <button class="btn-secondary" onclick="resetCostCorrections()">↺ Restaurar Original</button>
+        <span style="font-size:12px;color:var(--gray-500);margin-left:4px;">Campos vacíos usan proyección original</span>
+      </div>
+
+      <!-- Impact banner -->
+      <div class="impact-banner" id="costImpactBanner">
+        <div class="impact-item">
+          <div class="il">Costes Ajustados 2035</div>
+          <div class="iv" id="costImpCosts">—</div>
+          <div class="id" id="costImpCostsDelta">vs. proyección</div>
+        </div>
+        <div class="impact-item">
+          <div class="il">EBITDA Ajustado 2035</div>
+          <div class="iv" id="costImpEbitda">—</div>
+          <div class="id" id="costImpEbitdaDelta">vs. proyección</div>
+        </div>
+        <div class="impact-item">
+          <div class="il">Margen Ajustado 2035</div>
+          <div class="iv" id="costImpMargin">—</div>
+          <div class="id" id="costImpMarginDelta">vs. proyección</div>
+        </div>
+        <div class="impact-item">
+          <div class="il">Años Corregidos</div>
+          <div class="iv" id="costImpCount">—</div>
+          <div class="id" id="costImpCountLabel">correcciones activas</div>
+        </div>
+      </div>
+    </div>
+
     <div class="card" style="margin-bottom:24px;">
       <div class="card-header">
         <div class="card-title">Ingresos por Categoría</div>
@@ -1139,6 +1296,43 @@
           </thead>
           <tbody id="finTable"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- TABLA MODELO COSTES AJUSTADO -->
+    <div class="card" id="costAdjustedCard" style="display:none; margin-top:20px;">
+      <div class="card-header">
+        <div class="card-title">📊 P&L Ajustado vs Proyección Original</div>
+        <span class="mode-badge cost-adjusted">Costes Ajustados</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Año</th>
+              <th>Ingresos</th>
+              <th>Costes Originales</th>
+              <th>Costes Ajustados</th>
+              <th>Δ Costes</th>
+              <th>EBITDA Original</th>
+              <th>EBITDA Ajustado</th>
+              <th>Δ EBITDA</th>
+              <th>Margen Ajustado</th>
+            </tr>
+          </thead>
+          <tbody id="costAdjustedTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GRÁFICO COMPARATIVO COSTES -->
+    <div class="card" id="costAdjustedChartCard" style="display:none; margin-top:20px;">
+      <div class="card-header">
+        <div class="card-title">📈 EBITDA: Proyección Original vs Ajustado por Costes</div>
+        <span class="tag orange">Comparativa</span>
+      </div>
+      <div class="chart-container tall">
+        <canvas id="chartCostAdjusted"></canvas>
       </div>
     </div>
   </section>
@@ -2133,24 +2327,8 @@ function refreshAdjustedCharts() {
 
 // ===== TABLES =====
 function initTables() {
-  // Financial
-  const finTb = document.getElementById('finTable');
-  data.forEach((d, i) => {
-    const margin = ((d.ebitda/d.revTotal)*100).toFixed(1);
-    const yoy = i > 0 ? (((d.revTotal - data[i-1].revTotal)/data[i-1].revTotal)*100).toFixed(1) : '—';
-    finTb.innerHTML += `<tr>
-      <td>${d.year}</td>
-      <td>${(d.users/1e6).toFixed(2)}M</td>
-      <td>${fmt(d.revSub)}</td>
-      <td>${fmt(d.revTx)}</td>
-      <td>${fmt(d.revFx)}</td>
-      <td>${fmt(d.revCard)}</td>
-      <td><strong>${fmt(d.revTotal)}</strong></td>
-      <td>${fmt(d.costs)}</td>
-      <td class="positive">${fmt(d.ebitda)}</td>
-      <td>${margin}%</td>
-    </tr>`;
-  });
+  // Financial — delegate to refreshFinTable so cost adjustments can also update it
+  refreshFinTable(true);
 
   // Cohort
   const cohTb = document.getElementById('cohortTable');
@@ -2423,7 +2601,310 @@ function showSection(id, btn) {
   }, 30);
 }
 
-// ===== DOWNLOADS =====
+// ===== COST CORRECTION PANEL =====
+// Cost categories as % of total costs (splits must sum to 1.0)
+const COST_SPLITS = { personal: 0.45, tech: 0.20, marketing: 0.20, ops: 0.15 };
+const originalCosts = originalData.map(d => d.costs); // store original cost values
+let costCategory = 'total'; // currently selected category
+let costAdjustedData = JSON.parse(JSON.stringify(originalData)); // working copy for costs
+
+function getCostCategoryLabel(cat) {
+  return { total: 'Coste Total', personal: 'Personal', tech: 'Tecnología', marketing: 'Marketing', ops: 'Operaciones' }[cat] || cat;
+}
+
+function getCostCategoryPlaceholder(cat, costs) {
+  const base = cat === 'total' ? costs : costs * COST_SPLITS[cat];
+  return fmt(base) + ' (proyectado)';
+}
+
+function buildCostCorrectionGrid() {
+  const grid = document.getElementById('costCorrectionGrid');
+  grid.innerHTML = '';
+  originalData.forEach((d) => {
+    const projVal = costCategory === 'total' ? d.costs : d.costs * COST_SPLITS[costCategory];
+    grid.innerHTML += `
+      <div class="correction-field">
+        <div class="year-tag">${d.year}</div>
+        <label>${getCostCategoryLabel(costCategory)} (€)</label>
+        <div class="cost-input-wrap">
+          <input
+            type="number"
+            id="cost_${costCategory}_${d.year}"
+            placeholder="${getCostCategoryPlaceholder(costCategory, d.costs)}"
+            min="0"
+            step="10000"
+            oninput="onCostInput(${d.year}, this, '${costCategory}')"
+          >
+          <button class="cost-reset-btn" title="Restaurar año" onclick="resetCostYear(${d.year}, '${costCategory}')">✕</button>
+        </div>
+        <span class="deviation-chip neutral" id="costchip_${costCategory}_${d.year}">Proyección</span>
+      </div>`;
+  });
+}
+
+function setCostCategory(cat, btn) {
+  costCategory = cat;
+  document.querySelectorAll('.cost-cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildCostCorrectionGrid();
+}
+
+function onCostInput(year, inputEl, cat) {
+  const val = inputEl.value.trim();
+  const orig = originalData.find(d => d.year === year);
+  const origVal = cat === 'total' ? orig.costs : orig.costs * COST_SPLITS[cat];
+  const chip = document.getElementById(`costchip_${cat}_${year}`);
+
+  if (val === '' || isNaN(parseFloat(val))) {
+    inputEl.classList.remove('has-cost-override');
+    chip.className = 'deviation-chip neutral';
+    chip.textContent = 'Proyección';
+  } else {
+    const real = parseFloat(val);
+    const dev = ((real - origVal) / origVal * 100);
+    inputEl.classList.add('has-cost-override');
+    chip.className = 'deviation-chip ' + (dev <= 0 ? 'positive' : 'negative'); // less cost = positive!
+    chip.textContent = (dev >= 0 ? '▲ +' : '▼ ') + dev.toFixed(1) + '%';
+  }
+}
+
+function resetCostYear(year, cat) {
+  const inp = document.getElementById(`cost_${cat}_${year}`);
+  if (inp) { inp.value = ''; inp.classList.remove('has-cost-override'); }
+  const chip = document.getElementById(`costchip_${cat}_${year}`);
+  if (chip) { chip.className = 'deviation-chip neutral'; chip.textContent = 'Proyección'; }
+}
+
+function applyCostCorrections() {
+  const cats = ['total', 'personal', 'tech', 'marketing', 'ops'];
+
+  costAdjustedData = originalData.map((orig) => {
+    let adjustedCosts = orig.costs;
+    let hasOverride = false;
+
+    // Check if total override exists
+    const totalInp = document.getElementById(`cost_total_${orig.year}`);
+    const totalVal = totalInp ? totalInp.value.trim() : '';
+    if (totalVal !== '' && !isNaN(parseFloat(totalVal))) {
+      adjustedCosts = parseFloat(totalVal);
+      hasOverride = true;
+    } else {
+      // Check partial category overrides and reconstruct total
+      let reconstructed = orig.costs;
+      let partialOverride = false;
+      for (const cat of ['personal', 'tech', 'marketing', 'ops']) {
+        const inp = document.getElementById(`cost_${cat}_${orig.year}`);
+        const v = inp ? inp.value.trim() : '';
+        if (v !== '' && !isNaN(parseFloat(v))) {
+          const origCatVal = orig.costs * COST_SPLITS[cat];
+          const delta = parseFloat(v) - origCatVal;
+          reconstructed += delta;
+          partialOverride = true;
+          hasOverride = true;
+        }
+      }
+      if (partialOverride) adjustedCosts = Math.max(0, reconstructed);
+    }
+
+    const adjEbitda = orig.revTotal - adjustedCosts;
+    return {
+      ...orig,
+      costs: adjustedCosts,
+      ebitda: adjEbitda,
+      _costOverridden: hasOverride,
+      _costDelta: adjustedCosts - orig.costs
+    };
+  });
+
+  // Update financial charts
+  refreshCostCharts();
+  showCostAdjustedTable();
+  updateCostImpactBanner();
+
+  // Badge
+  const hasAny = costAdjustedData.some(d => d._costOverridden);
+  const badge = document.getElementById('costModeBadge');
+  badge.className = hasAny ? 'mode-badge cost-adjusted' : 'mode-badge original';
+  badge.textContent = hasAny ? 'Costes Ajustados' : 'Modelo Original';
+
+  // Also refresh main finTable with adjusted data
+  refreshFinTable();
+}
+
+function resetCostCorrections() {
+  costAdjustedData = JSON.parse(JSON.stringify(originalData));
+  ['total','personal','tech','marketing','ops'].forEach(cat => {
+    originalData.forEach(d => resetCostYear(d.year, cat));
+  });
+  buildCostCorrectionGrid();
+  document.getElementById('costAdjustedCard').style.display = 'none';
+  document.getElementById('costAdjustedChartCard').style.display = 'none';
+  document.getElementById('costModeBadge').className = 'mode-badge original';
+  document.getElementById('costModeBadge').textContent = 'Modelo Original';
+  updateCostImpactBanner();
+  refreshFinTable(true); // reset to original
+}
+
+function updateCostImpactBanner() {
+  const origLast = originalData[9];
+  const adjLast  = costAdjustedData[9];
+
+  const costDelta   = ((adjLast.costs - origLast.costs) / origLast.costs * 100);
+  const ebitdaDelta = ((adjLast.ebitda - origLast.ebitda) / origLast.ebitda * 100);
+  const origMargin  = origLast.ebitda / origLast.revTotal * 100;
+  const adjMargin   = adjLast.ebitda  / adjLast.revTotal  * 100;
+  const count = costAdjustedData.filter(d => d._costOverridden).length;
+
+  document.getElementById('costImpCosts').textContent = fmt(adjLast.costs);
+  const cd = document.getElementById('costImpCostsDelta');
+  cd.textContent = (costDelta >= 0 ? '▲ +' : '▼ ') + Math.abs(costDelta).toFixed(1) + '% vs original';
+  cd.className = 'id ' + (costDelta <= 0 ? 'up' : 'down'); // less cost = green
+
+  document.getElementById('costImpEbitda').textContent = fmt(adjLast.ebitda);
+  const ed = document.getElementById('costImpEbitdaDelta');
+  ed.textContent = (ebitdaDelta >= 0 ? '▲ +' : '▼ ') + Math.abs(ebitdaDelta).toFixed(1) + '% vs original';
+  ed.className = 'id ' + (ebitdaDelta >= 0 ? 'up' : 'down');
+
+  document.getElementById('costImpMargin').textContent = adjMargin.toFixed(1) + '%';
+  const md = document.getElementById('costImpMarginDelta');
+  const marginDelta = adjMargin - origMargin;
+  md.textContent = (marginDelta >= 0 ? '▲ +' : '▼ ') + Math.abs(marginDelta).toFixed(1) + 'pp vs original';
+  md.className = 'id ' + (marginDelta >= 0 ? 'up' : 'down');
+
+  document.getElementById('costImpCount').textContent = count || '—';
+  document.getElementById('costImpCountLabel').textContent = count
+    ? `año${count > 1 ? 's' : ''} corregido${count > 1 ? 's' : ''}`
+    : 'sin correcciones activas';
+}
+
+function showCostAdjustedTable() {
+  document.getElementById('costAdjustedCard').style.display = 'block';
+  document.getElementById('costAdjustedChartCard').style.display = 'block';
+
+  const tbody = document.getElementById('costAdjustedTable');
+  tbody.innerHTML = '';
+  costAdjustedData.forEach((adj, i) => {
+    const orig = originalData[i];
+    const costDelta = adj.costs - orig.costs;
+    const ebitdaDelta = adj.ebitda - orig.ebitda;
+    const adjMargin = (adj.ebitda / adj.revTotal * 100).toFixed(1);
+    const costDeltaPct = (costDelta / orig.costs * 100).toFixed(1);
+    const ebitdaDeltaPct = (ebitdaDelta / orig.ebitda * 100).toFixed(1);
+
+    tbody.innerHTML += `<tr${adj._costOverridden ? ' style="background:var(--orange-light);"' : ''}>
+      <td>${adj.year}${adj._costOverridden ? ' 🔶' : ''}</td>
+      <td>${fmt(adj.revTotal)}</td>
+      <td>${fmt(orig.costs)}</td>
+      <td><strong>${fmt(adj.costs)}</strong></td>
+      <td class="${costDelta <= 0 ? 'positive' : 'negative'}">${costDelta >= 0 ? '+' : ''}${costDeltaPct}%</td>
+      <td>${fmt(orig.ebitda)}</td>
+      <td class="${adj.ebitda >= orig.ebitda ? 'positive' : 'negative'}"><strong>${fmt(adj.ebitda)}</strong></td>
+      <td class="${ebitdaDelta >= 0 ? 'positive' : 'negative'}">${ebitdaDelta >= 0 ? '+' : ''}${ebitdaDeltaPct}%</td>
+      <td>${adjMargin}%</td>
+    </tr>`;
+  });
+}
+
+function refreshCostCharts() {
+  // Update the Costes vs Ingresos chart
+  const cCtx = document.getElementById('chartCostes');
+  if (cCtx && cCtx._chart) {
+    cCtx._chart.data.datasets[1].data = costAdjustedData.map(d => d.costs/1e6);
+    cCtx._chart.update();
+  }
+
+  // Update EBITDA acumulado chart
+  let acum = 0;
+  const acumAdj = costAdjustedData.map(d => { acum += d.ebitda; return acum/1e6; });
+  const eaCtx = document.getElementById('chartEbitdaAcum');
+  if (eaCtx && eaCtx._chart) {
+    eaCtx._chart.data.datasets[0].data = acumAdj;
+    eaCtx._chart.update();
+  }
+
+  // Build comparison chart: original EBITDA vs adjusted EBITDA
+  const aCtx = document.getElementById('chartCostAdjusted');
+  if (aCtx) {
+    if (aCtx._chart) aCtx._chart.destroy();
+    aCtx._chart = new Chart(aCtx, {
+      type: 'bar',
+      data: {
+        labels: years,
+        datasets: [
+          {
+            label: 'EBITDA Original',
+            data: originalData.map(d => d.ebitda/1e6),
+            backgroundColor: 'rgba(37,99,235,0.6)',
+            borderRadius: 4
+          },
+          {
+            label: 'EBITDA Ajustado',
+            data: costAdjustedData.map(d => d.ebitda/1e6),
+            backgroundColor: costAdjustedData.map(d =>
+              d._costOverridden
+                ? (d.ebitda >= originalData.find(o=>o.year===d.year).ebitda ? 'rgba(22,163,74,0.85)' : 'rgba(220,38,38,0.75)')
+                : 'rgba(13,191,173,0.7)'
+            ),
+            borderRadius: 4
+          },
+          {
+            label: 'Costes Ajustados',
+            data: costAdjustedData.map(d => d.costs/1e6),
+            backgroundColor: 'rgba(249,115,22,0.5)',
+            borderRadius: 4,
+            type: 'line',
+            borderColor: COLORS.orange,
+            borderWidth: 2.5,
+            pointRadius: 5,
+            pointBackgroundColor: costAdjustedData.map(d => d._costOverridden ? COLORS.orange : 'rgba(249,115,22,0.4)'),
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            fill: false,
+            tension: 0.4,
+            order: 0
+          }
+        ]
+      },
+      options: {
+        ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
+        plugins: {
+          ...CHART_DEFAULTS.plugins,
+          tooltip: { callbacks: { label: c => c.dataset.label + ': €' + c.raw.toFixed(1) + 'M' } }
+        },
+        scales: {
+          x: CHART_DEFAULTS.scales.x,
+          y: { ...CHART_DEFAULTS.scales.y, ticks: { callback: v => '€'+v+'M', font:{family:'DM Sans',size:11} } }
+        }
+      }
+    });
+  }
+}
+
+function refreshFinTable(reset = false) {
+  // Refresh the main financial table with cost-adjusted data
+  const tbody = document.getElementById('finTable');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  const source = reset ? originalData : costAdjustedData;
+  source.forEach((d, i) => {
+    const margin = ((d.ebitda/d.revTotal)*100).toFixed(1);
+    const highlight = !reset && d._costOverridden ? ' style="background:var(--orange-light);"' : '';
+    tbody.innerHTML += `<tr${highlight}>
+      <td>${d.year}${!reset && d._costOverridden ? ' 🔶' : ''}</td>
+      <td>${(d.users/1e6).toFixed(2)}M</td>
+      <td>${fmt(d.revSub)}</td>
+      <td>${fmt(d.revTx)}</td>
+      <td>${fmt(d.revFx)}</td>
+      <td>${fmt(d.revCard)}</td>
+      <td><strong>${fmt(d.revTotal)}</strong></td>
+      <td${!reset && d._costOverridden ? ' style="color:var(--orange);font-weight:700;"' : ''}>${fmt(d.costs)}</td>
+      <td class="${d.ebitda >= 0 ? 'positive' : 'negative'}">${fmt(d.ebitda)}</td>
+      <td>${margin}%</td>
+    </tr>`;
+  });
+}
+
+
 function downloadCSV() {
   const sheets = {
     "Resumen_Anual": {
@@ -2603,6 +3084,8 @@ function downloadExcel() {
 window.addEventListener('load', () => {
   buildCorrectionGrid();
   updateImpactBanner();
+  buildCostCorrectionGrid();
+  updateCostImpactBanner();
   initTables();
   calcSimulator();
   calcTaxes();
