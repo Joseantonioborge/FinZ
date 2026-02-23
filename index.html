@@ -1085,24 +1085,24 @@
 
     <div class="hero-banner">
       <div class="hero-text">
-        <h2>Dashboard FinX 2026–2035</h2>
+        <h2>Dashboard FinX 2026–2035 <span id="overviewAdjBadge" style="display:none;font-size:13px;font-weight:600;background:rgba(255,255,255,0.25);padding:3px 10px;border-radius:20px;vertical-align:middle;letter-spacing:0.3px;">⚡ Modelo Ajustado</span></h2>
         <p>Proyección financiera · Wallet digital · GenZ España</p>
       </div>
       <div class="hero-metrics">
         <div class="hero-m">
-          <span class="hv">4.85M</span>
+          <span class="hv" id="heroUsers">4.85M</span>
           <span class="hl">Usuarios 2035</span>
         </div>
         <div class="hero-m">
-          <span class="hv">€327M</span>
+          <span class="hv" id="heroRev">€327M</span>
           <span class="hl">Ingresos 2035</span>
         </div>
         <div class="hero-m">
-          <span class="hv">€245M</span>
+          <span class="hv" id="heroEbitda">€245M</span>
           <span class="hl">EBITDA 2035</span>
         </div>
         <div class="hero-m">
-          <span class="hv">74.8%</span>
+          <span class="hv" id="heroMargin">74.8%</span>
           <span class="hl">Margen EBITDA</span>
         </div>
       </div>
@@ -1112,20 +1112,20 @@
       <div class="kpi-card teal">
         <div class="kpi-icon teal">👥</div>
         <div class="kpi-label">Usuarios Activos 2026</div>
-        <div class="kpi-value">564K</div>
-        <div class="kpi-delta up">▲ Año de lanzamiento</div>
+        <div class="kpi-value" id="kpiUsers2026">564K</div>
+        <div class="kpi-delta up" id="kpiUsers2026Delta">▲ Año de lanzamiento</div>
       </div>
       <div class="kpi-card blue">
         <div class="kpi-icon blue">💳</div>
         <div class="kpi-label">Ingresos Totales 2026</div>
-        <div class="kpi-value">€38M</div>
-        <div class="kpi-delta up">▲ Base sólida</div>
+        <div class="kpi-value" id="kpiRev2026">€38M</div>
+        <div class="kpi-delta up" id="kpiRev2026Delta">▲ Base sólida</div>
       </div>
       <div class="kpi-card green">
         <div class="kpi-icon green">📈</div>
         <div class="kpi-label">EBITDA 2026</div>
-        <div class="kpi-value">€28M</div>
-        <div class="kpi-delta up">▲ 73.7% margen</div>
+        <div class="kpi-value" id="kpiEbitda2026">€28M</div>
+        <div class="kpi-delta up" id="kpiEbitda2026Delta">▲ 73.7% margen</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-icon orange">🏆</div>
@@ -1902,6 +1902,12 @@ function makeChart(id, config) {
 }
 
 // ===== CHARTS =====
+// Returns adjustedData if user corrections are active, otherwise originalData
+function getActiveData() {
+  return (typeof adjustedData !== 'undefined' && adjustedData.some(d => d._overridden))
+    ? adjustedData : originalData;
+}
+
 // Track which tabs have been initialized
 const tabInited = {};
 
@@ -1916,15 +1922,18 @@ function initChartsForTab(tabId) {
 }
 
 function initOverviewCharts() {
+  const src = getActiveData();
+  const last = src[src.length - 1];
+
   // Rev vs EBITDA
   makeChart('chartRevEbitda', {
     type: 'bar',
     data: {
       labels: years,
       datasets: [
-        { label: 'Ingresos Totales', data: data.map(d=>d.revTotal/1e6), backgroundColor: 'rgba(37,99,235,0.75)', borderRadius: 4 },
-        { label: 'EBITDA', data: data.map(d=>d.ebitda/1e6), backgroundColor: 'rgba(13,191,173,0.85)', borderRadius: 4 },
-        { label: 'Costes', data: data.map(d=>d.costs/1e6), backgroundColor: 'rgba(249,115,22,0.7)', borderRadius: 4 }
+        { label: 'Ingresos Totales', data: src.map(d=>d.revTotal/1e6), backgroundColor: 'rgba(37,99,235,0.75)', borderRadius: 4 },
+        { label: 'EBITDA',           data: src.map(d=>d.ebitda/1e6),   backgroundColor: 'rgba(13,191,173,0.85)', borderRadius: 4 },
+        { label: 'Costes',           data: src.map(d=>d.costs/1e6),    backgroundColor: 'rgba(249,115,22,0.7)',  borderRadius: 4 }
       ]
     },
     options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
@@ -1939,8 +1948,8 @@ function initOverviewCharts() {
     data: {
       labels: years,
       datasets: [
-        { label: 'Usuarios Activos', data: data.map(d=>d.users/1e6), borderColor: COLORS.teal, backgroundColor: COLORS.tealLight, fill: true, tension: 0.4, borderWidth: 2.5, pointBackgroundColor: COLORS.teal, pointRadius: 4 },
-        { label: 'Premium', data: data.map(d=>d.premium/1e6), borderColor: COLORS.blue, backgroundColor: COLORS.blueLight, fill: true, tension: 0.4, borderWidth: 2, pointBackgroundColor: COLORS.blue, pointRadius: 3 }
+        { label: 'Usuarios Activos', data: src.map(d=>d.users/1e6),   borderColor: COLORS.teal, backgroundColor: COLORS.tealLight, fill: true, tension: 0.4, borderWidth: 2.5, pointBackgroundColor: COLORS.teal, pointRadius: 4 },
+        { label: 'Premium',          data: src.map(d=>d.premium/1e6), borderColor: COLORS.blue, backgroundColor: COLORS.blueLight, fill: true, tension: 0.4, borderWidth: 2,   pointBackgroundColor: COLORS.blue, pointRadius: 3 }
       ]
     },
     options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
@@ -1949,7 +1958,6 @@ function initOverviewCharts() {
   });
 
   // Mix 2035 Donut
-  const last = data[9];
   makeChart('chartMix', {
     type: 'doughnut',
     data: {
@@ -1965,8 +1973,8 @@ function initOverviewCharts() {
     data: {
       labels: years,
       datasets: [
-        { label: 'Starter', data: data.map(d=>d.starter/1e6), backgroundColor: 'rgba(13,191,173,0.75)', borderRadius: 4 },
-        { label: 'Premium', data: data.map(d=>d.premium/1e6), backgroundColor: 'rgba(37,99,235,0.8)', borderRadius: 4 }
+        { label: 'Starter', data: src.map(d=>d.starter/1e6), backgroundColor: 'rgba(13,191,173,0.75)', borderRadius: 4 },
+        { label: 'Premium', data: src.map(d=>d.premium/1e6), backgroundColor: 'rgba(37,99,235,0.8)',   borderRadius: 4 }
       ]
     },
     options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
@@ -1979,7 +1987,7 @@ function initOverviewCharts() {
     type: 'line',
     data: {
       labels: years,
-      datasets: [{ label: 'Margen EBITDA %', data: data.map(d=>+((d.ebitda/d.revTotal)*100).toFixed(1)), borderColor: COLORS.orange, backgroundColor: 'rgba(249,115,22,0.1)', fill: true, tension: 0.4, borderWidth: 2.5, pointBackgroundColor: COLORS.orange, pointRadius: 4 }]
+      datasets: [{ label: 'Margen EBITDA %', data: src.map(d=>+((d.ebitda/d.revTotal)*100).toFixed(1)), borderColor: COLORS.orange, backgroundColor: 'rgba(249,115,22,0.1)', fill: true, tension: 0.4, borderWidth: 2.5, pointBackgroundColor: COLORS.orange, pointRadius: 4 }]
     },
     options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
       scales: { x: CHART_DEFAULTS.scales.x, y: { ...CHART_DEFAULTS.scales.y, min: 60, ticks: { callback: v => v+'%', font:{family:'DM Sans',size:11} } } }
@@ -2167,6 +2175,7 @@ function applyCorrections() {
 
   // Update charts that depend on user data
   refreshAdjustedCharts();
+  refreshOverview(adjustedData);
   showAdjustedTable();
   updateImpactBanner();
 
@@ -2181,6 +2190,7 @@ function resetCorrections() {
   adjustedData = JSON.parse(JSON.stringify(originalData));
   originalData.forEach(d => resetYear(d.year));
   refreshAdjustedCharts();
+  refreshOverview(originalData);
   document.getElementById('adjustedModelCard').style.display = 'none';
   document.getElementById('adjustedChartCard').style.display = 'none';
   document.getElementById('modeBadge').className = 'mode-badge original';
@@ -2248,6 +2258,91 @@ function showAdjustedTable() {
     </tr>`;
   });
 }
+
+function refreshOverview(source) {
+  const first = source[0];
+  const last  = source[source.length - 1];
+  const isAdj = source.some(d => d._overridden);
+
+  // ── Hero banner ──────────────────────────────────────────────────────────
+  document.getElementById('heroUsers').textContent  = (last.users/1e6).toFixed(2) + 'M';
+  document.getElementById('heroRev').textContent    = fmt(last.revTotal);
+  document.getElementById('heroEbitda').textContent = fmt(last.ebitda);
+  document.getElementById('heroMargin').textContent = ((last.ebitda/last.revTotal)*100).toFixed(1) + '%';
+  document.getElementById('overviewAdjBadge').style.display = isAdj ? 'inline' : 'none';
+
+  // ── KPI cards ─────────────────────────────────────────────────────────────
+  const origFirst = originalData[0];
+  const uDelta  = ((first.users    - origFirst.users)    / origFirst.users    * 100).toFixed(1);
+  const rDelta  = ((first.revTotal - origFirst.revTotal) / origFirst.revTotal * 100).toFixed(1);
+  const eDelta  = ((first.ebitda   - origFirst.ebitda)   / origFirst.ebitda   * 100).toFixed(1);
+
+  document.getElementById('kpiUsers2026').textContent = first.users >= 1e6
+    ? (first.users/1e6).toFixed(2)+'M' : Math.round(first.users/1e3)+'K';
+  document.getElementById('kpiRev2026').textContent    = fmt(first.revTotal);
+  document.getElementById('kpiEbitda2026').textContent = fmt(first.ebitda);
+
+  if (isAdj) {
+    document.getElementById('kpiUsers2026Delta').textContent  = (uDelta >= 0 ? '▲ +' : '▼ ') + uDelta + '% vs proyección';
+    document.getElementById('kpiRev2026Delta').textContent    = (rDelta >= 0 ? '▲ +' : '▼ ') + rDelta + '% vs proyección';
+    document.getElementById('kpiEbitda2026Delta').textContent = (eDelta >= 0 ? '▲ +' : '▼ ') + eDelta + '% vs proyección';
+    document.getElementById('kpiUsers2026Delta').className  = 'kpi-delta ' + (uDelta >= 0 ? 'up' : 'down');
+    document.getElementById('kpiRev2026Delta').className    = 'kpi-delta ' + (rDelta >= 0 ? 'up' : 'down');
+    document.getElementById('kpiEbitda2026Delta').className = 'kpi-delta ' + (eDelta >= 0 ? 'up' : 'down');
+  } else {
+    document.getElementById('kpiUsers2026Delta').textContent  = '▲ Año de lanzamiento';
+    document.getElementById('kpiRev2026Delta').textContent    = '▲ Base sólida';
+    document.getElementById('kpiEbitda2026Delta').textContent = '▲ ' + ((origFirst.ebitda/origFirst.revTotal)*100).toFixed(1) + '% margen';
+    document.getElementById('kpiUsers2026Delta').className  = 'kpi-delta up';
+    document.getElementById('kpiRev2026Delta').className    = 'kpi-delta up';
+    document.getElementById('kpiEbitda2026Delta').className = 'kpi-delta up';
+  }
+
+  // ── Overview charts (only if already initialised) ────────────────────────
+  if (!tabInited['overview']) return; // will be built fresh when tab opens
+
+  // chartRevEbitda — bar: Ingresos / EBITDA / Costes
+  const revChart = document.getElementById('chartRevEbitda');
+  if (revChart && revChart._chart) {
+    revChart._chart.data.datasets[0].data = source.map(d => d.revTotal/1e6);
+    revChart._chart.data.datasets[1].data = source.map(d => d.ebitda/1e6);
+    revChart._chart.data.datasets[2].data = source.map(d => d.costs/1e6);
+    revChart._chart.update();
+  }
+
+  // chartUsers — line: Activos / Premium
+  const usersChart = document.getElementById('chartUsers');
+  if (usersChart && usersChart._chart) {
+    usersChart._chart.data.datasets[0].data = source.map(d => d.users/1e6);
+    usersChart._chart.data.datasets[1].data = source.map(d => d.premium/1e6);
+    usersChart._chart.update();
+  }
+
+  // chartMix — doughnut 2035 revenue mix
+  const mixChart = document.getElementById('chartMix');
+  if (mixChart && mixChart._chart) {
+    mixChart._chart.data.datasets[0].data = [
+      last.revSub/1e6, last.revTx/1e6, last.revFx/1e6, last.revCard/1e6
+    ];
+    mixChart._chart.update();
+  }
+
+  // chartTiers — bar: Starter / Premium
+  const tiersChart = document.getElementById('chartTiers');
+  if (tiersChart && tiersChart._chart) {
+    tiersChart._chart.data.datasets[0].data = source.map(d => d.starter/1e6);
+    tiersChart._chart.data.datasets[1].data = source.map(d => d.premium/1e6);
+    tiersChart._chart.update();
+  }
+
+  // chartMargin — line: Margen EBITDA %
+  const marginChart = document.getElementById('chartMargin');
+  if (marginChart && marginChart._chart) {
+    marginChart._chart.data.datasets[0].data = source.map(d => +((d.ebitda/d.revTotal)*100).toFixed(1));
+    marginChart._chart.update();
+  }
+}
+
 
 function refreshAdjustedCharts() {
   // Ensure users tab charts exist
@@ -2594,6 +2689,11 @@ function showSection(id, btn) {
   if (btn) btn.classList.add('active');
   // Init charts for this tab if not done yet, then resize all visible charts
   initChartsForTab(id);
+  // If navigating to overview, sync with latest adjusted data
+  if (id === 'overview') {
+    const source = adjustedData.some(d => d._overridden) ? adjustedData : originalData;
+    refreshOverview(source);
+  }
   setTimeout(() => {
     document.querySelectorAll('#'+id+' canvas').forEach(canvas => {
       if (canvas._chart) canvas._chart.resize();
