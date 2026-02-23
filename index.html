@@ -601,6 +601,188 @@
   /* ===== SCROLLABLE CHART ROW ===== */
   .scrollable-table { overflow-x: auto; }
 
+  /* ===== USER CORRECTION PANEL ===== */
+  .correction-panel {
+    background: linear-gradient(135deg, #F0FDFA 0%, #EFF6FF 100%);
+    border: 1.5px solid var(--teal);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .correction-panel::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(13,191,173,0.08);
+  }
+
+  .correction-panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .correction-panel-desc {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-bottom: 20px;
+  }
+
+  .correction-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 1100px) { .correction-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px)  { .correction-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .correction-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .correction-field label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .correction-field .year-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--teal);
+    margin-bottom: 2px;
+  }
+
+  .correction-input-wrap {
+    position: relative;
+  }
+
+  .correction-input-wrap input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--gray-900);
+    background: var(--white);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  .correction-input-wrap input:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(13,191,173,0.12);
+  }
+
+  .correction-input-wrap input.has-override {
+    border-color: var(--orange);
+    background: var(--orange-light);
+    font-weight: 600;
+    color: var(--orange);
+  }
+
+  .correction-input-wrap .reset-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-400);
+    font-size: 13px;
+    padding: 2px;
+    line-height: 1;
+    transition: color 0.2s;
+    display: none;
+  }
+
+  .correction-input-wrap input.has-override ~ .reset-btn {
+    display: block;
+    color: var(--orange);
+  }
+
+  .correction-input-wrap .reset-btn:hover { color: var(--red); }
+
+  .deviation-chip {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  .deviation-chip.positive { background: var(--green-light); color: var(--green); }
+  .deviation-chip.negative { background: var(--red-light); color: var(--red); }
+  .deviation-chip.neutral  { background: var(--gray-100); color: var(--gray-500); }
+
+  .correction-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .impact-banner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed rgba(13,191,173,0.4);
+  }
+
+  @media (max-width: 800px) { .impact-banner { grid-template-columns: repeat(2, 1fr); } }
+
+  .impact-item {
+    text-align: center;
+    padding: 10px;
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-200);
+  }
+
+  .impact-item .il { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); font-weight: 600; margin-bottom: 4px; }
+  .impact-item .iv { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: var(--gray-900); }
+  .impact-item .id { font-size: 11px; font-weight: 600; margin-top: 2px; }
+  .impact-item .id.up { color: var(--green); }
+  .impact-item .id.down { color: var(--red); }
+
+  .mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .mode-badge.original { background: var(--gray-100); color: var(--gray-500); }
+  .mode-badge.adjusted { background: var(--orange-light); color: var(--orange); }
+  .mode-badge.adjusted::before { content: '●'; font-size: 8px; animation: pulse 1.5s infinite; }
+
   /* ===== FOOTER ===== */
   footer {
     text-align: center;
@@ -720,12 +902,12 @@
 
 <!-- NAV TABS -->
 <nav class="nav-tabs">
-  <button class="nav-tab active" onclick="showSection('overview')">📊 Overview</button>
-  <button class="nav-tab" onclick="showSection('financials')">💰 Financials</button>
-  <button class="nav-tab" onclick="showSection('users')">👥 Usuarios</button>
-  <button class="nav-tab" onclick="showSection('simulator')">🧮 Simulador Personal</button>
-  <button class="nav-tab" onclick="showSection('taxes')">📋 Impuestos</button>
-  <button class="nav-tab" onclick="showSection('kpis')">🎯 KPIs</button>
+  <button class="nav-tab active" onclick="showSection('overview', this)">📊 Overview</button>
+  <button class="nav-tab" onclick="showSection('financials', this)">💰 Financials</button>
+  <button class="nav-tab" onclick="showSection('users', this)">👥 Usuarios</button>
+  <button class="nav-tab" onclick="showSection('simulator', this)">🧮 Simulador Personal</button>
+  <button class="nav-tab" onclick="showSection('taxes', this)">📋 Impuestos</button>
+  <button class="nav-tab" onclick="showSection('kpis', this)">🎯 KPIs</button>
 </nav>
 
 <main>
@@ -902,6 +1084,45 @@
     <div class="section-title">Análisis de Usuarios</div>
     <div class="section-desc">Cohortes, churn, retención y distribución por tier · 2026–2035</div>
 
+    <!-- PANEL DE CORRECCIÓN -->
+    <div class="correction-panel">
+      <div class="correction-panel-title">
+        🎛️ Corrección Manual de Usuarios Reales
+        <span class="mode-badge original" id="modeBadge">Modelo Original</span>
+      </div>
+      <div class="correction-panel-desc">
+        Introduce los usuarios reales observados para cada año. El modelo recalculará automáticamente ingresos, costes y EBITDA en función de las desviaciones respecto a la proyección original.
+      </div>
+      <div class="correction-grid" id="correctionGrid"></div>
+      <div class="correction-actions">
+        <button class="btn-calc" onclick="applyCorrections()">⚡ Aplicar y Recalcular Modelo</button>
+        <button class="btn-secondary" onclick="resetCorrections()">↺ Restaurar Original</button>
+        <span style="font-size:12px;color:var(--gray-500);margin-left:4px;">Campos vacíos usan proyección original</span>
+      </div>
+      <div class="impact-banner" id="impactBanner">
+        <div class="impact-item">
+          <div class="il">Usuarios Ajustados 2035</div>
+          <div class="iv" id="impUsers">—</div>
+          <div class="id" id="impUsersDelta">vs. proyección</div>
+        </div>
+        <div class="impact-item">
+          <div class="il">Ingresos Ajustados 2035</div>
+          <div class="iv" id="impRev">—</div>
+          <div class="id" id="impRevDelta">vs. proyección</div>
+        </div>
+        <div class="impact-item">
+          <div class="il">EBITDA Ajustado 2035</div>
+          <div class="iv" id="impEbitda">—</div>
+          <div class="id" id="impEbitdaDelta">vs. proyección</div>
+        </div>
+        <div class="impact-item">
+          <div class="il">Desviación Media</div>
+          <div class="iv" id="impDeviation">—</div>
+          <div class="id" id="impDeviationLabel">sobre el total</div>
+        </div>
+      </div>
+    </div>
+
     <div class="grid-4">
       <div class="kpi-card teal">
         <div class="kpi-icon teal">🔄</div>
@@ -969,6 +1190,42 @@
           </thead>
           <tbody id="cohortTable"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- TABLA MODELO AJUSTADO -->
+    <div class="card" id="adjustedModelCard" style="display:none;">
+      <div class="card-header">
+        <div class="card-title">📊 Modelo Ajustado vs Proyección Original</div>
+        <span class="mode-badge adjusted">Ajustado</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Año</th>
+              <th>Usuarios Original</th>
+              <th>Usuarios Reales</th>
+              <th>Desviación</th>
+              <th>Ingresos Ajustados</th>
+              <th>Costes Ajustados</th>
+              <th>EBITDA Ajustado</th>
+              <th>Margen %</th>
+            </tr>
+          </thead>
+          <tbody id="adjustedTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GRÁFICO COMPARATIVO AJUSTADO -->
+    <div class="card" id="adjustedChartCard" style="display:none; margin-top:20px;">
+      <div class="card-header">
+        <div class="card-title">📈 Usuarios: Proyección vs Realidad</div>
+        <span class="tag orange">Comparativa</span>
+      </div>
+      <div class="chart-container tall">
+        <canvas id="chartAdjustedUsers"></canvas>
       </div>
     </div>
   </section>
@@ -1344,8 +1601,12 @@ const cohortes = [
 ];
 
 const years = data.map(d => d.year);
-const fmt = n => '€' + (n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(0)+'K' : n.toFixed(0));
-const fmtFull = n => '€' + n.toLocaleString('es-ES', {maximumFractionDigits:0});
+const fmt = n => '€' + (Math.abs(n) >= 1e6 ? (n/1e6).toFixed(1)+'M' : Math.abs(n) >= 1e3 ? (n/1e3).toFixed(0)+'K' : n.toFixed(0));
+const fmtFull = n => {
+  const abs = Math.abs(n);
+  const formatted = abs.toLocaleString('es-ES', {maximumFractionDigits:0});
+  return (n < 0 ? '-€' : '€') + formatted;
+};
 const pct = (a,b) => ((a/b)*100).toFixed(1)+'%';
 
 const COLORS = {
@@ -1372,16 +1633,29 @@ function makeChart(id, config) {
 }
 
 // ===== CHARTS =====
-function initCharts() {
+// Track which tabs have been initialized
+const tabInited = {};
+
+function initChartsForTab(tabId) {
+  if (tabInited[tabId]) return;
+  tabInited[tabId] = true;
+
+  if (tabId === 'overview') initOverviewCharts();
+  if (tabId === 'financials') initFinancialsCharts();
+  if (tabId === 'users') initUsersCharts();
+  if (tabId === 'kpis') initKpiCharts();
+}
+
+function initOverviewCharts() {
   // Rev vs EBITDA
   makeChart('chartRevEbitda', {
     type: 'bar',
     data: {
       labels: years,
       datasets: [
-        { label: 'Ingresos Totales', data: data.map(d=>d.revTotal/1e6), backgroundColor: 'rgba(37,99,235,0.75)', borderRadius: 4, order: 1 },
-        { label: 'EBITDA', data: data.map(d=>d.ebitda/1e6), backgroundColor: 'rgba(13,191,173,0.85)', borderRadius: 4, order: 1 },
-        { label: 'Costes', data: data.map(d=>d.costs/1e6), backgroundColor: 'rgba(249,115,22,0.7)', borderRadius: 4, order: 1 }
+        { label: 'Ingresos Totales', data: data.map(d=>d.revTotal/1e6), backgroundColor: 'rgba(37,99,235,0.75)', borderRadius: 4 },
+        { label: 'EBITDA', data: data.map(d=>d.ebitda/1e6), backgroundColor: 'rgba(13,191,173,0.85)', borderRadius: 4 },
+        { label: 'Costes', data: data.map(d=>d.costs/1e6), backgroundColor: 'rgba(249,115,22,0.7)', borderRadius: 4 }
       ]
     },
     options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
@@ -1426,7 +1700,7 @@ function initCharts() {
         { label: 'Premium', data: data.map(d=>d.premium/1e6), backgroundColor: 'rgba(37,99,235,0.8)', borderRadius: 4 }
       ]
     },
-    options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false, stacked: true,
+    options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
       scales: { x: { ...CHART_DEFAULTS.scales.x, stacked: true }, y: { ...CHART_DEFAULTS.scales.y, stacked: true, ticks: { callback: v => v.toFixed(1)+'M', font:{family:'DM Sans',size:11} } } }
     }
   });
@@ -1436,13 +1710,15 @@ function initCharts() {
     type: 'line',
     data: {
       labels: years,
-      datasets: [{ label: 'Margen EBITDA %', data: data.map(d=>((d.ebitda/d.revTotal)*100).toFixed(1)), borderColor: COLORS.orange, backgroundColor: 'rgba(249,115,22,0.1)', fill: true, tension: 0.4, borderWidth: 2.5, pointBackgroundColor: COLORS.orange, pointRadius: 4 }]
+      datasets: [{ label: 'Margen EBITDA %', data: data.map(d=>+((d.ebitda/d.revTotal)*100).toFixed(1)), borderColor: COLORS.orange, backgroundColor: 'rgba(249,115,22,0.1)', fill: true, tension: 0.4, borderWidth: 2.5, pointBackgroundColor: COLORS.orange, pointRadius: 4 }]
     },
     options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
       scales: { x: CHART_DEFAULTS.scales.x, y: { ...CHART_DEFAULTS.scales.y, min: 60, ticks: { callback: v => v+'%', font:{family:'DM Sans',size:11} } } }
     }
   });
+}
 
+function initFinancialsCharts() {
   // Rev Breakdown stacked
   makeChart('chartRevBreakdown', {
     type: 'bar',
@@ -1485,7 +1761,9 @@ function initCharts() {
       scales: { x: CHART_DEFAULTS.scales.x, y: { ...CHART_DEFAULTS.scales.y, ticks: { callback: v => '€'+v.toFixed(0)+'M', font:{family:'DM Sans',size:11} } } }
     }
   });
+}
 
+function initUsersCharts() {
   // Users Churn
   makeChart('chartChurn', {
     type: 'bar',
@@ -1508,7 +1786,7 @@ function initCharts() {
       labels: ['Inicio', 'Año +1', 'Año +2', 'Año +3'],
       datasets: cohortes.slice(0,5).map((c, i) => ({
         label: 'Cohorte '+c.year,
-        data: [100, (c.y1/c.init*100).toFixed(1), (c.y2/c.init*100).toFixed(1), (c.y3/c.init*100).toFixed(1)],
+        data: [100, +(c.y1/c.init*100).toFixed(1), +(c.y2/c.init*100).toFixed(1), +(c.y3/c.init*100).toFixed(1)],
         borderColor: [COLORS.teal, COLORS.blue, COLORS.orange, COLORS.indigo, COLORS.green][i],
         tension: 0.4, borderWidth: 2, pointRadius: 3, fill: false
       }))
@@ -1517,15 +1795,17 @@ function initCharts() {
       scales: { x: CHART_DEFAULTS.scales.x, y: { ...CHART_DEFAULTS.scales.y, min: 0, max: 100, ticks: { callback: v => v+'%', font:{family:'DM Sans',size:11} } } }
     }
   });
+}
 
+function initKpiCharts() {
   // KPI margin
   makeChart('chartKpiMargen', {
     type: 'line',
     data: {
       labels: years,
       datasets: [
-        { label: 'Margen EBITDA', data: data.map(d=>((d.ebitda/d.revTotal)*100).toFixed(1)), borderColor: COLORS.teal, tension: 0.4, borderWidth: 2.5, pointRadius: 4, fill: false },
-        { label: 'Ingreso/Usuario (€)', data: data.map(d=>(d.revTotal/d.users).toFixed(1)), borderColor: COLORS.orange, tension: 0.4, borderWidth: 2, pointRadius: 3, fill: false }
+        { label: 'Margen EBITDA %', data: data.map(d=>+((d.ebitda/d.revTotal)*100).toFixed(1)), borderColor: COLORS.teal, tension: 0.4, borderWidth: 2.5, pointRadius: 4, fill: false },
+        { label: 'Ingreso/Usuario (€)', data: data.map(d=>+(d.revTotal/d.users).toFixed(1)), borderColor: COLORS.orange, tension: 0.4, borderWidth: 2, pointRadius: 3, fill: false }
       ]
     },
     options: { ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
@@ -1533,6 +1813,248 @@ function initCharts() {
     }
   });
 }
+
+// ===== CORRECTION PANEL =====
+const originalData = JSON.parse(JSON.stringify(data)); // deep copy of original
+let adjustedData = JSON.parse(JSON.stringify(data));   // working copy
+
+function buildCorrectionGrid() {
+  const grid = document.getElementById('correctionGrid');
+  grid.innerHTML = '';
+  originalData.forEach((d, i) => {
+    grid.innerHTML += `
+      <div class="correction-field">
+        <div class="year-tag">${d.year}</div>
+        <label>Usuarios Reales</label>
+        <div class="correction-input-wrap">
+          <input
+            type="number"
+            id="corr_${d.year}"
+            placeholder="${(d.users/1e3).toFixed(0)}K (proyectado)"
+            min="0"
+            step="1000"
+            oninput="onCorrectionInput(${d.year}, this)"
+          >
+          <button class="reset-btn" title="Restaurar año" onclick="resetYear(${d.year})">✕</button>
+        </div>
+        <span class="deviation-chip neutral" id="chip_${d.year}">Proyección</span>
+      </div>`;
+  });
+}
+
+function onCorrectionInput(year, inputEl) {
+  const val = inputEl.value.trim();
+  const orig = originalData.find(d => d.year === year).users;
+  const chip = document.getElementById(`chip_${year}`);
+  if (val === '' || isNaN(parseFloat(val))) {
+    inputEl.classList.remove('has-override');
+    chip.className = 'deviation-chip neutral';
+    chip.textContent = 'Proyección';
+  } else {
+    const real = parseFloat(val);
+    const dev = ((real - orig) / orig * 100);
+    inputEl.classList.add('has-override');
+    chip.className = 'deviation-chip ' + (dev >= 0 ? 'positive' : 'negative');
+    chip.textContent = (dev >= 0 ? '▲ +' : '▼ ') + dev.toFixed(1) + '%';
+  }
+}
+
+function resetYear(year) {
+  const inp = document.getElementById(`corr_${year}`);
+  inp.value = '';
+  inp.classList.remove('has-override');
+  const chip = document.getElementById(`chip_${year}`);
+  chip.className = 'deviation-chip neutral';
+  chip.textContent = 'Proyección';
+}
+
+function applyCorrections() {
+  // Recalculate model based on user overrides
+  // Revenue per user and cost per user ratios from original data
+  adjustedData = originalData.map((orig, i) => {
+    const inp = document.getElementById(`corr_${orig.year}`);
+    const val = inp ? inp.value.trim() : '';
+    const hasOverride = val !== '' && !isNaN(parseFloat(val));
+    const realUsers = hasOverride ? Math.round(parseFloat(val)) : orig.users;
+    const ratio = realUsers / orig.users; // scaling factor
+
+    // Scale revenues and costs proportionally to user change
+    return {
+      ...orig,
+      users: realUsers,
+      starter: Math.round(orig.starter * ratio),
+      premium: Math.round(orig.premium * ratio),
+      revSub: orig.revSub * ratio,
+      revTx: orig.revTx * ratio,
+      revFx: orig.revFx * ratio,
+      revCard: orig.revCard * ratio,
+      revTotal: orig.revTotal * ratio,
+      costs: orig.costs * ratio,
+      ebitda: orig.ebitda * ratio,
+      _overridden: hasOverride,
+      _ratio: ratio
+    };
+  });
+
+  // Update charts that depend on user data
+  refreshAdjustedCharts();
+  showAdjustedTable();
+  updateImpactBanner();
+
+  // Update mode badge
+  const hasAny = adjustedData.some(d => d._overridden);
+  const badge = document.getElementById('modeBadge');
+  badge.className = hasAny ? 'mode-badge adjusted' : 'mode-badge original';
+  badge.textContent = hasAny ? 'Modelo Ajustado' : 'Modelo Original';
+}
+
+function resetCorrections() {
+  adjustedData = JSON.parse(JSON.stringify(originalData));
+  originalData.forEach(d => resetYear(d.year));
+  refreshAdjustedCharts();
+  document.getElementById('adjustedModelCard').style.display = 'none';
+  document.getElementById('adjustedChartCard').style.display = 'none';
+  document.getElementById('modeBadge').className = 'mode-badge original';
+  document.getElementById('modeBadge').textContent = 'Modelo Original';
+  updateImpactBanner();
+}
+
+function updateImpactBanner() {
+  const origLast = originalData[9];
+  const adjLast = adjustedData[9];
+
+  const userDelta = ((adjLast.users - origLast.users) / origLast.users * 100);
+  const revDelta  = ((adjLast.revTotal - origLast.revTotal) / origLast.revTotal * 100);
+  const ebitdaDelta = ((adjLast.ebitda - origLast.ebitda) / origLast.ebitda * 100);
+
+  const deviations = adjustedData
+    .filter(d => d._overridden)
+    .map(d => Math.abs(d._ratio - 1) * 100);
+  const avgDev = deviations.length ? (deviations.reduce((a,b)=>a+b,0) / deviations.length) : 0;
+  const overriddenCount = deviations.length;
+
+  document.getElementById('impUsers').textContent = (adjLast.users/1e6).toFixed(2)+'M';
+  document.getElementById('impUsersDelta').textContent =
+    (userDelta >= 0 ? '▲ +' : '▼ ') + userDelta.toFixed(1)+'% vs original';
+  document.getElementById('impUsersDelta').className = 'id ' + (userDelta >= 0 ? 'up' : 'down');
+
+  document.getElementById('impRev').textContent = fmt(adjLast.revTotal);
+  document.getElementById('impRevDelta').textContent =
+    (revDelta >= 0 ? '▲ +' : '▼ ') + revDelta.toFixed(1)+'% vs original';
+  document.getElementById('impRevDelta').className = 'id ' + (revDelta >= 0 ? 'up' : 'down');
+
+  document.getElementById('impEbitda').textContent = fmt(adjLast.ebitda);
+  document.getElementById('impEbitdaDelta').textContent =
+    (ebitdaDelta >= 0 ? '▲ +' : '▼ ') + ebitdaDelta.toFixed(1)+'% vs original';
+  document.getElementById('impEbitdaDelta').className = 'id ' + (ebitdaDelta >= 0 ? 'up' : 'down');
+
+  document.getElementById('impDeviation').textContent = overriddenCount ? avgDev.toFixed(1)+'%' : '—';
+  document.getElementById('impDeviationLabel').textContent = overriddenCount
+    ? `${overriddenCount} año${overriddenCount>1?'s':''} corregido${overriddenCount>1?'s':''}`
+    : 'Sin correcciones activas';
+}
+
+function showAdjustedTable() {
+  const card = document.getElementById('adjustedModelCard');
+  const chartCard = document.getElementById('adjustedChartCard');
+  card.style.display = 'block';
+  chartCard.style.display = 'block';
+
+  const tbody = document.getElementById('adjustedTable');
+  tbody.innerHTML = '';
+  adjustedData.forEach((adj, i) => {
+    const orig = originalData[i];
+    const dev = ((adj.users - orig.users) / orig.users * 100);
+    const margin = ((adj.ebitda / adj.revTotal) * 100).toFixed(1);
+    const devClass = dev > 0 ? 'positive' : dev < 0 ? 'negative' : '';
+    tbody.innerHTML += `<tr${adj._overridden ? ' style="background:var(--orange-light);"' : ''}>
+      <td>${adj.year}${adj._overridden ? ' 🔶' : ''}</td>
+      <td>${(orig.users/1e6).toFixed(2)}M</td>
+      <td><strong>${(adj.users/1e6).toFixed(2)}M</strong></td>
+      <td class="${devClass}">${dev >= 0 ? '+' : ''}${dev.toFixed(1)}%</td>
+      <td>${fmt(adj.revTotal)}</td>
+      <td>${fmt(adj.costs)}</td>
+      <td class="positive">${fmt(adj.ebitda)}</td>
+      <td>${margin}%</td>
+    </tr>`;
+  });
+}
+
+function refreshAdjustedCharts() {
+  // Ensure users tab charts exist
+  if (!tabInited['users']) {
+    initUsersCharts();
+    tabInited['users'] = true;
+  }
+
+  // Refresh users chart with adjusted data
+  const ctx = document.getElementById('chartUsers');
+  if (ctx && ctx._chart) {
+    ctx._chart.data.datasets[0].data = adjustedData.map(d=>d.users/1e6);
+    ctx._chart.data.datasets[1].data = adjustedData.map(d=>d.premium/1e6);
+    ctx._chart.update();
+  }
+
+  // Refresh churn chart
+  const cCtx = document.getElementById('chartChurn');
+  if (cCtx && cCtx._chart) {
+    cCtx._chart.data.datasets[0].data = adjustedData.map(d=>d.newUsers/1e3);
+    cCtx._chart.data.datasets[1].data = adjustedData.map(d=>d.churn/1e3);
+    cCtx._chart.update();
+  }
+
+  // Build comparative adjusted vs original chart
+  const aCtx = document.getElementById('chartAdjustedUsers');
+  if (aCtx) {
+    if (aCtx._chart) aCtx._chart.destroy();
+    aCtx._chart = new Chart(aCtx, {
+      type: 'line',
+      data: {
+        labels: years,
+        datasets: [
+          {
+            label: 'Proyección Original',
+            data: originalData.map(d=>d.users/1e6),
+            borderColor: COLORS.blue,
+            borderDash: [6, 3],
+            tension: 0.4,
+            borderWidth: 2,
+            pointRadius: 4,
+            pointBackgroundColor: COLORS.blue,
+            fill: false
+          },
+          {
+            label: 'Usuarios Reales / Ajustados',
+            data: adjustedData.map(d=>d.users/1e6),
+            borderColor: COLORS.teal,
+            backgroundColor: COLORS.tealLight,
+            tension: 0.4,
+            borderWidth: 2.5,
+            pointRadius: adjustedData.map(d=> d._overridden ? 7 : 4),
+            pointBackgroundColor: adjustedData.map(d=> d._overridden ? COLORS.orange : COLORS.teal),
+            pointBorderColor: adjustedData.map(d=> d._overridden ? '#fff' : COLORS.teal),
+            pointBorderWidth: 2,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        ...CHART_DEFAULTS, responsive: true, maintainAspectRatio: false,
+        plugins: {
+          ...CHART_DEFAULTS.plugins,
+          tooltip: { callbacks: {
+            label: c => c.dataset.label + ': ' + c.raw.toFixed(2) + 'M usuarios'
+          }}
+        },
+        scales: {
+          x: CHART_DEFAULTS.scales.x,
+          y: { ...CHART_DEFAULTS.scales.y, ticks: { callback: v => v.toFixed(1)+'M', font:{family:'DM Sans',size:11} } }
+        }
+      }
+    });
+  }
+}
+
 
 // ===== TABLES =====
 function initTables() {
@@ -1659,6 +2181,7 @@ function calcSimulator() {
 
   // Chart
   const ctx = document.getElementById('chartSim');
+  if (!ctx) return;
   if (ctx._chart) ctx._chart.destroy();
   ctx._chart = new Chart(ctx, {
     type: 'line',
@@ -1769,6 +2292,7 @@ function calcTaxes() {
 
   // Tax chart
   const ctx = document.getElementById('chartTax');
+  if (!ctx) return;
   if (ctx._chart) ctx._chart.destroy();
   const taxTypes = tipo === 'autonomo'
     ? ['IRPF', 'IVA Neto', 'Seg. Social', 'Neto']
@@ -1810,19 +2334,29 @@ function calcIRPF(base) {
 }
 
 // ===== NAVIGATION =====
-function showSection(id) {
+function showSection(id, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  event.target.classList.add('active');
+  if (btn) btn.classList.add('active');
+  // Init charts for this tab if not done yet, then resize all visible charts
+  initChartsForTab(id);
+  setTimeout(() => {
+    document.querySelectorAll('#'+id+' canvas').forEach(canvas => {
+      if (canvas._chart) canvas._chart.resize();
+    });
+  }, 30);
 }
 
 // ===== INIT =====
 window.addEventListener('load', () => {
-  initCharts();
+  buildCorrectionGrid();
+  updateImpactBanner();
   initTables();
   calcSimulator();
   calcTaxes();
+  // Init charts for the default active tab (overview)
+  initChartsForTab('overview');
 });
 </script>
 </body>
