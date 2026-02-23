@@ -783,8 +783,72 @@
   .mode-badge.adjusted { background: var(--orange-light); color: var(--orange); }
   .mode-badge.adjusted::before { content: '●'; font-size: 8px; animation: pulse 1.5s infinite; }
 
-  /* ===== FOOTER ===== */
-  footer {
+  /* ===== DOWNLOAD BUTTONS ===== */
+  .download-bar {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 200;
+  }
+
+  .btn-download {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 20px;
+    border-radius: 50px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transition: all 0.22s;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+    text-decoration: none;
+  }
+
+  .btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+  }
+
+  .btn-download:active { transform: translateY(0); }
+
+  .btn-download.excel {
+    background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+    color: white;
+  }
+
+  .btn-download.csv {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    color: white;
+  }
+
+  .btn-download .dl-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  /* Tooltip on hover */
+  .download-bar-label {
+    font-size: 10px;
+    text-align: right;
+    color: var(--gray-500);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  @media (max-width: 600px) {
+    .download-bar { bottom: 16px; right: 12px; }
+    .btn-download { padding: 10px 14px; font-size: 12px; }
+  }
     text-align: center;
     padding: 20px;
     font-size: 12px;
@@ -1572,6 +1636,17 @@
   <strong>FinX</strong> — Neobanco Digital GenZ · Modelo de Proyección 2026–2035 · Dashboard interno · Mockup Conceptual
 </footer>
 
+<!-- ===== DOWNLOAD BAR ===== -->
+<div class="download-bar">
+  <div class="download-bar-label">📥 Exportar datos</div>
+  <button class="btn-download excel" onclick="downloadExcel()">
+    <span class="dl-icon">📗</span> Descargar Excel
+  </button>
+  <button class="btn-download csv" onclick="downloadCSV()">
+    <span class="dl-icon">📄</span> Descargar CSV
+  </button>
+</div>
+
 <script>
 // ===== DATA =====
 const data = [
@@ -2348,7 +2423,183 @@ function showSection(id, btn) {
   }, 30);
 }
 
-// ===== INIT =====
+// ===== DOWNLOADS =====
+function downloadCSV() {
+  const sheets = {
+    "Resumen_Anual": {
+      headers: ["Año","Usuarios Activos","Nuevos Usuarios","Churn","Starter","Premium",
+                "Ingresos Suscripcion","Ingresos Transacciones","Ingresos FX-Cripto",
+                "Ingresos Tarjetas","Total Ingresos","Costes Totales","EBITDA","Margen EBITDA %"],
+      rows: data.map(d => [
+        d.year, d.users, d.newUsers, d.churn, d.starter, d.premium,
+        d.revSub, d.revTx, d.revFx, d.revCard, d.revTotal, d.costs, d.ebitda,
+        ((d.ebitda/d.revTotal)*100).toFixed(2)+'%'
+      ])
+    },
+    "KPIs_Anuales": {
+      headers: ["Año","Usuarios","% Premium","Ingreso por Usuario (EUR)","EBITDA por Usuario (EUR)","Coste por Usuario (EUR)","Margen EBITDA %","Crecimiento YoY %"],
+      rows: data.map((d, i) => [
+        d.year, d.users,
+        ((d.premium/d.users)*100).toFixed(2)+'%',
+        (d.revTotal/d.users).toFixed(2),
+        (d.ebitda/d.users).toFixed(2),
+        (d.costs/d.users).toFixed(2),
+        ((d.ebitda/d.revTotal)*100).toFixed(2)+'%',
+        i > 0 ? (((d.users-data[i-1].users)/data[i-1].users)*100).toFixed(2)+'%' : '—'
+      ])
+    },
+    "Cohortes": {
+      headers: ["Cohorte","Usuarios Iniciales","Año +1","Retencion +1 %","Año +2","Retencion +2 %","Año +3","Retencion +3 %"],
+      rows: cohortes.map(c => [
+        c.year, c.init,
+        c.y1, ((c.y1/c.init)*100).toFixed(2)+'%',
+        c.y2, ((c.y2/c.init)*100).toFixed(2)+'%',
+        c.y3, ((c.y3/c.init)*100).toFixed(2)+'%'
+      ])
+    },
+    "KPIs_Estaticos": {
+      headers: ["Indicador","Valor"],
+      rows: [
+        ["CAC Medio (EUR)", 19.5],
+        ["LTV Medio (EUR)", 140],
+        ["Ratio LTV/CAC", 7.18],
+        ["Churn Anual (%)", "18.0%"],
+      ]
+    }
+  };
+
+  // Build multi-sheet CSV (separated by blank lines + sheet name)
+  let csvContent = "\uFEFF"; // BOM for Excel UTF-8
+  for (const [sheetName, { headers, rows }] of Object.entries(sheets)) {
+    csvContent += `### ${sheetName} ###\n`;
+    csvContent += headers.join(";") + "\n";
+    rows.forEach(row => {
+      csvContent += row.map(v => {
+        const str = String(v ?? '');
+        return str.includes(';') || str.includes('"') || str.includes('\n')
+          ? `"${str.replace(/"/g, '""')}"` : str;
+      }).join(";") + "\n";
+    });
+    csvContent += "\n";
+  }
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'FinX_Economics_2026-2035.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function downloadExcel() {
+  // Build a minimal XLSX using SheetJS-style encoding inline (pure JS, no library needed)
+  // We'll use a data URI with the pre-built Excel structure encoded as CSV-based XLSX
+  // Since SheetJS is not loaded, we generate a rich HTML table that Excel opens natively
+  const sheetName = "FinX Economics";
+
+  const rows = [
+    ["FinX — Modelo de Proyección Financiera 2026–2035", "", "", "", "", "", "", "", "", "", "", "", ""],
+    ["Generado:", new Date().toLocaleDateString('es-ES'), "", "", "", "", "", "", "", "", "", "", ""],
+    [""],
+    ["RESUMEN ANUAL"],
+    ["Año","Usuarios Activos","Nuevos Usuarios","Churn","Starter","Premium",
+     "Ing. Suscripción (€)","Ing. Transacciones (€)","Ing. FX/Cripto (€)","Ing. Tarjetas (€)",
+     "Total Ingresos (€)","Costes Totales (€)","EBITDA (€)","Margen EBITDA %"],
+    ...data.map(d => [
+      d.year, d.users, d.newUsers, d.churn, d.starter, d.premium,
+      d.revSub, d.revTx, d.revFx, d.revCard, d.revTotal, d.costs, d.ebitda,
+      +((d.ebitda/d.revTotal)*100).toFixed(2)
+    ]),
+    [""],
+    ["KPIs ANUALES"],
+    ["Año","Usuarios","% Premium","Rev/Usuario €","EBITDA/Usuario €","Coste/Usuario €","Margen %","Crec. YoY %"],
+    ...data.map((d,i) => [
+      d.year, d.users,
+      +((d.premium/d.users)*100).toFixed(2),
+      +(d.revTotal/d.users).toFixed(2),
+      +(d.ebitda/d.users).toFixed(2),
+      +(d.costs/d.users).toFixed(2),
+      +((d.ebitda/d.revTotal)*100).toFixed(2),
+      i > 0 ? +(((d.users-data[i-1].users)/data[i-1].users)*100).toFixed(2) : ''
+    ]),
+    [""],
+    ["COHORTES DE USUARIOS"],
+    ["Cohorte","Usuarios Iniciales","Año +1","Retención +1 %","Año +2","Retención +2 %","Año +3","Retención +3 %"],
+    ...cohortes.map(c => [
+      c.year, c.init,
+      c.y1, +((c.y1/c.init)*100).toFixed(2),
+      c.y2, +((c.y2/c.init)*100).toFixed(2),
+      c.y3, +((c.y3/c.init)*100).toFixed(2)
+    ]),
+    [""],
+    ["KPIs ESTRATÉGICOS"],
+    ["Indicador","Valor","Benchmark","Estado"],
+    ["CAC Medio (€)", 19.5, "< 30 €", "✅ Excelente"],
+    ["LTV Medio (€)", 140, "> 100 €", "✅ Excelente"],
+    ["Ratio LTV/CAC", 7.18, "> 3x", "✅ World-class"],
+    ["Churn Anual", 0.18, "< 15%", "⚠️ Mejorable"],
+    ["Margen EBITDA 2026", +((data[0].ebitda/data[0].revTotal)*100).toFixed(2), "> 40%", "✅ World-class"],
+    ["Margen EBITDA 2035", +((data[9].ebitda/data[9].revTotal)*100).toFixed(2), "> 40%", "✅ World-class"],
+  ];
+
+  // Build HTML table that Excel can open as xlsx
+  let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:x="urn:schemas-microsoft-com:office:excel"
+    xmlns="http://www.w3.org/TR/REC-html40">
+  <head>
+    <meta charset="UTF-8">
+    <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>
+      <x:ExcelWorksheet><x:Name>FinX Economics</x:Name>
+      <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+      </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 10pt; }
+      .title { font-size: 14pt; font-weight: bold; background: #1E293B; color: white; }
+      .section { font-size: 11pt; font-weight: bold; background: #0DBFAD; color: white; }
+      .hdr { font-weight: bold; background: #1E293B; color: white; text-align: center; }
+      .alt { background: #F9FAFB; }
+      .num { text-align: right; }
+      .year { font-weight: bold; color: #2563EB; text-align: center; }
+      td, th { padding: 4px 8px; border: 1px solid #E5E7EB; }
+    </style>
+  </head><body><table>`;
+
+  rows.forEach((row, ri) => {
+    if (row.length === 0 || (row.length === 1 && row[0] === "")) {
+      html += '<tr><td colspan="14">&nbsp;</td></tr>';
+      return;
+    }
+    const isTitle   = ri === 0;
+    const isSection = typeof row[0] === 'string' && row.length === 1 && row[0].toUpperCase() === row[0];
+    const isHdr     = typeof row[0] === 'string' && (row[0] === 'Año' || row[0] === 'Cohorte' || row[0] === 'Indicador');
+
+    html += '<tr>';
+    row.forEach((cell, ci) => {
+      const cls = isTitle ? 'title' : isSection ? 'section' : isHdr ? 'hdr' : (ci === 0 ? 'year' : 'num');
+      const tag = isHdr ? 'th' : 'td';
+      const val = cell === null || cell === undefined ? '' : cell;
+      html += `<${tag} class="${cls}">${val}</${tag}>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</table></body></html>';
+
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'FinX_Economics_2026-2035.xls';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
 window.addEventListener('load', () => {
   buildCorrectionGrid();
   updateImpactBanner();
